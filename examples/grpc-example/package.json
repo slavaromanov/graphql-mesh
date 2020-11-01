@@ -5,6 +5,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "graph-gen": "graphql-mesh graphql --output proto.graphql",
     "grpc:start": "node index.js",
     "mesh:start": "mesh serve",
     "start": "concurrently \"yarn grpc:start\" \"yarn mesh:start\""

@@ -1,5 +1,6 @@
 import { findAndParseConfig } from '@graphql-mesh/config';
 import { getMesh } from '@graphql-mesh/runtime';
+import { printSchema } from 'graphql';
 import * as yargs from 'yargs';
 import { generateTsTypes } from './commands/typescript';
 import { generateSdk } from './commands/generate-sdk';
@@ -82,6 +83,27 @@ export async function graphqlMesh() {
         });
         const { schema, rawSources, destroy } = await getMesh(meshConfig);
         const result = await generateTsTypes(schema, rawSources, meshConfig.mergerType);
+        const outFile = resolve(process.cwd(), args.output);
+        await ensureFile(outFile);
+        await writeFile(outFile, result);
+        destroy();
+      }
+    )
+    .command<{ output: string }>(
+      'graphql',
+      'Generate collected .graphql schema',
+      builder => {
+        builder.option('output', {
+          required: true,
+          type: 'string',
+        });
+      },
+      async args => {
+        const meshConfig = await findAndParseConfig({
+          ignoreAdditionalResolvers: true,
+        });
+        const { schema, destroy } = await getMesh(meshConfig);
+        const result = await printSchema(schema);
         const outFile = resolve(process.cwd(), args.output);
         await ensureFile(outFile);
         await writeFile(outFile, result);
